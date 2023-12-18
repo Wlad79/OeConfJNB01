@@ -18,6 +18,26 @@ populate_sdk()
 	cd conf
 }
 
+kernel () {
+#usage: $ . yocto.sh && kernel
+    source sources/poky/oe-init-build-env build-oe-jnB01
+    bitbake -c menuconfig virtual/kernel
+}
+
+compile_kernel()
+{
+	echo "Datum: " `date`
+	# https://stackoverflow.com/questions/38701150/bitbake-force-one-task-of-a-recipe-and-all-following
+	# bitbake -C compile mypackage
+	source sources/poky/oe-init-build-env build-oe-jnB01
+	#bitbake -c cleanall linux-tegra
+	bitbake -c compile linux-tegra
+	echo "Datum: " `date`
+	#cd ..
+	#start
+	#echo "Datum: " `date`
+}
+
 uboot()
 {
 	#usage: $ source build-oe-yocto.sh && uboot
@@ -49,8 +69,19 @@ case $1 in
 		echo "Date: " `date`
 		cd ../../
 		source sources/poky/oe-init-build-env build-oe-jnB01
-		bitbake raspberrypi-general-image -c cleanall
+		bitbake core-image-minimal -c cleanall
 		cd conf
+		;;
+    qtbase_configure )
+		echo "Date: " `date`
+		cd ../../
+		source sources/poky/oe-init-build-env build-oe-jnB01
+		bitbake -c configure qtbase
+		cd conf
+		;;
+	config_summary)
+		cd ../
+		find -name config.summary
 		;;
     start )
         # $ source build-oe-yocto.sh start
@@ -58,8 +89,8 @@ case $1 in
 		echo "Date: " `date`
 		cd ../../
 		source sources/poky/oe-init-build-env build-oe-jnB01
+		bitbake jetson-image
 		#bitbake core-image-minimal
-		bitbake core-image-minimal
 		#bitbake core-image-sato # error with cc1plus
 		#bitbake core-image-weston
 		#bitbake core-image-full-cmdline
@@ -95,7 +126,7 @@ case $1 in
 	reset )
 		cd ../../
 		source sources/poky/oe-init-build-env build-oe-jnB01
-		bitbake core-image-minimal -c cleanall
+		#bitbake core-image-minimal -c cleanall
 		rm -drf tmp-glibc
 		rm -drf tmp
 		rm -drf sstate-cache
